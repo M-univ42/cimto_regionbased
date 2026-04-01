@@ -1,71 +1,70 @@
-### CIMTO Implementation 1: Generating Phantoms
+### CIMTO Region Based: Phantoms, Synograms and SIRT
 
 ##### Marcell Nemeth (S4456394) 
 #### Description
 This project attempts to replicate Van Eyndhoven et al. 2014, a research paper on iteratively reconstructing structural changes in CT scans, by distinguihing between stationary and "dynamic" areas.
 
-To be able to compare results, a series of different phantoms need to be generated, as close to the original paper as possible.
+For this purpose, a phantom generator of 4 structurally different phantom types was implemented, with randomly varying parameters for the change in structures. These phantoms were generated in a resolution of 500 by 500 pixels, with 300 sequence steps. From these phantoms synograms were generated, which forms the basis for the reconstruciton algortithm (SIRT as baseline and rSIRT as implemented in the paper). 
 
-As the original paper, these generators also output pictures of size 500 by 500, and create a sequence of 300 frames.
-For the visualizaiton the sequence is sampled at equal intervals.
+Performance is measured by RSME in pixel values between the original and reconstructed image.
 
 #### Structure
+The project is stuctured in the following way:
 
-The phantoms.py file contains functions to generate 4 different types of phantoms mentioned in the paper:
-| No. | Description | Function | Status |
+##### Project Structure
+| Filename | Description | Functions | Status |
 |---|---|---|---|
-|1. | Shepp-Logan phantom with two chambers, fluid flows from one to another (linear/sigmoid transfer). The two chambers currently only change intensity, not the area the fluid covers. This will be implemented later.| create_phantom1()|Linear implemented (Sigmoid if needed)
-|2.| Shepp-Logan phantom with one chamber, the underlying texture is shifted to simulate fluid movement. A predefined texture is shifted behind an ellipse mask (chamber), to simulate fluid movement. In the original paper it seems a swirl transformation was also applied. | create_phantom2()|Implemented, swirl can be added as optional|
-|3.| Random Blob, with two connected chamber, fluid movment is simulated by texture shift/swirl. The mask for the "8-shaped" chamber and the background of the blob still needs to be implemented.| create_phantom3()|Not yet implemented, but just combination on 1) and 2)|
-|4.| Circular background with (Gaussian?) organic texture and sudden crack (angled). The crack is formed by an initial elongated triangle, to which additional triangles are transposed to 5 frames per triangle (to simulate sudden crack). There is a bright hue around the crack in the original paper, and it seems to use elongated poligons instead. | create_phantom4()|Straight crack implemented (angle not yet)|
+|phantoms_generator.py| This script holds the functions needed to generate different types of phantoms. The generated phantoms have randomly assigned parameters reproducible by using the same seed. The output is 500 by 500 phantom sequences of 300 steps in .npy format, with randomized parameters saved as meta data in JSON format. |create_phantom1(), create_phantom2(),create_phantom4()|Phantom 3 needs to be implemented|
+|synogram_generator.py| This script generates synograms from the phantoms, and visualizes samples. Additionally it also stores important meta data neccesary for reconstruction (vol_geom and proj_geom) the output is synogram sequences in .npy format and meta data in JSON format.|make_beam(), generate_synogram(), generate_synogram_sqeuence(), save_synogram_sequence(), display_synogram(), display_synogram_seq(), save_syno_meta()| Most of the functions are correclty implemented|
+|sirt.py| This script holds the functions for reconstruction from the generated synograms. The reconstruciton function is based on SIRT, and uses synogram meta data saved.| generate_from_meta(), sirt_reconstruction(), save_reconstruction()| The functions are not fully implemented, CUDA integration is needed for performance|
+|metrics.py| Holds functions for metric evaluation (RMSE for the paper), on both stationary and sequential images|rmse(), rmse_seq()| TODO: optional heatmap on high error areas for analysis|
+|helpers.py| Contains all the helper functions for phantom generation and a logger class for verbosity||Done|
+
+##### Phantom types
+| No. | Description | Sample Meta Data | Status |
+|---|---|---|---|
+|1. | Shepp-Logan phantom with two chambers, fluid flows from one to another (linear/sigmoid transfer). The two chambers currently only change intensity, not the area the fluid covers. This will be implemented later.| {'phantom_type': 1, 'fill_mode': 'linear', 'rand_factor': 1.082186814566789}|Linear implemented (Sigmoid if needed)
+|2.| Shepp-Logan phantom with one chamber, the underlying texture is shifted to simulate fluid movement. A predefined texture is shifted behind an ellipse mask (chamber), to simulate fluid movement. In the original paper it seems a swirl transformation was also applied. | {'phantom_type': 2, 'rad1': 39, 'rad2': 81, 'texture_width': 107, 'texture_height': 96, 'total_shift': 29}|Implemented, swirl can be added as optional|
+|3.| Random Blob, with two connected chamber, fluid movment is simulated by texture shift/swirl. The mask for the "8-shaped" chamber and the background of the blob still needs to be implemented.| TBD|Not yet implemented, but just combination on 1) and 2)|
+|4.| Circular background with (Gaussian?) organic texture and sudden crack (angled). The crack is formed by an initial elongated triangle, to which additional triangles are transposed to 5 frames per triangle (to simulate sudden crack). There is a bright hue around the crack in the original paper, and it seems to use elongated poligons instead. | {'phantom_type': 4, 'stresspoint': 104, 'no_cracks': 10, 'crack_length': 57, 'crack_speed': [104, 109, 114, 119, 124, 129, 134, 139, 144, 149], 'meta_angles': [list]}|Straight crack implemented (angle not yet)|
 
 ---
 #### TODO
 ##### Phantoms Feedback
-- [ ] Remove Paths/Replace texture
-- [ ] Create readnom seed/ parameters 
-- [ ] Documentation for parameter/seed 
+- [x] Remove Paths/Replace texture
+- [x] Create readnom seed/ parameters 
+- [x] Documentation for parameter/seed 
+
 ##### Synogram
-- [ ] Scanning protocol for projection angle sequence
-- [ ] Strip kernel projector
+- [x] Scanning protocol for projection angle sequence
+- [x] Strip kernel projector
 - [ ] Poisson noise
 
 ##### Code reconstruction
-- [ ] Implement SIRT (from ASTRA)
+- [ ] Implement 500x500 to 100x100 pipeline
+- [ ] CUDA integration
+- [x] Implement SIRT (from ASTRA)
 - [ ] SIRT per angular subset
 - [ ] Implmenet rSIRT
 - [ ] Create Table 1
 - [ ] Convergence Plot
 #### Results
 
-**NOTE**: The following issues are known and will be fixed:
-- [ ] Phantom 1 Chambers are gradually filled by changing intensity, a mask needs to be applied instead
-- [ ] Phantom 3 connected chambers need to be created
-- [ ] Phantom 4, angle in crack needs to be created, with brigther edges
-- [ ] Phantom 4, background is used from original paper, higher res. background needed for 500x500
+
 
 ---
 
-##### Phantom 1 Original
-<img src="readme_img/phantom1_orig.png" width="50%"/>
+##### Phantom 1  and its Synogram
+![Phantom 1](readme_img/phantom1.png)
+![Synogram 1](readme_img/syno1.png)
 
-##### Reconstructed
+##### Phantom 2  and its Synogram
+![Phantom 2](readme_img/phantom2.png)
+![Synogram 2](readme_img/syno2.png)
+##### Phantom 4  and its Synogram
+![Phantom 4](readme_img/phantom4.png)
+![Synogram 4](readme_img/syno4.png)
 
-<img src="readme_img/phantom1.png" width="50%"/>
-
-##### Phantom 2 Original
-<img src="readme_img/phantom2_orig.png" width="50%"/>
-
-##### Reconstructed
-
-<img src="readme_img/phantom2.png" width="50%"/>
-
-##### Phantom 4 Original
-<img src="readme_img/phantom4_orig.png" width="50%"/>
-
-##### Reconstructed
-
-<img src="readme_img/phantom4.png" width="50%"/>
 
 ---
 
@@ -83,8 +82,5 @@ https://github.com/mckib2/phantominator/blob/main/phantominator/ct_shepp_logan.p
 https://scikit-image.org/docs/stable/auto_examples/transform/plot_transform_types.html#sphx-glr-auto-examples-transform-plot-transform-types-py
 https://scikit-image.org/docs/stable/auto_examples/transform/plot_geometric.html
 
-##### Textures Used
-
-https://www.vecteezy.com/vector-art/3794343-the-pattern-of-the-skull-pattern-with-white-skull
 
 

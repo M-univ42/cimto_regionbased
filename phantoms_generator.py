@@ -46,7 +46,7 @@ def create_phantom1(size, no_frames, full_int, empty_int,
     meta_data = {
         "phantom_type": 1,
         "fill_mode": fill_mode,
-        "rand_factor": rand_factor
+        "rand_factor": float(rand_factor),
     }
     return phantoms, chamber_mask, meta_data
 
@@ -103,11 +103,11 @@ def create_phantom2(size, no_frames, full_int, empty_int, seed = 42):
     #save meta data for runs
     meta_data = {
         "phantom_type": 2,
-        "rad1": rad1,
-        "rad2": rad2,
-        "texture_width": texture_width,
-        "texture_height": texture_height,
-        "total_shift": total_shift,
+        "rad1": int(rad1),
+        "rad2": int(rad2),
+        "texture_width": int(texture_width),
+        "texture_height": int(texture_height),
+        "total_shift": int(total_shift),
     }
     return phantoms, variable_mask,meta_data
 
@@ -143,7 +143,7 @@ def create_phantom4(size, no_frames, full_int, empty_int,seed=42):
    
     phantoms = np.zeros((no_frames, size, size))
   
-    meta_angles = [init_angle]
+    meta_angles = [float(init_angle)]
     crack_speed = range(stresspoint, min(no_frames, stresspoint + 5 * no_cracks), 5)
     for t in range(no_frames):
 
@@ -159,21 +159,22 @@ def create_phantom4(size, no_frames, full_int, empty_int,seed=42):
                     crack_new, x_new, y_new = make_crack(size, x_tip, y_tip, crack_length, main_angle)
                     crack_mask = np.maximum(crack_mask, crack_new)
                     next_tips.append((x_new, y_new, main_angle))
-                    meta_angles.append(main_angle)
+                    meta_angles.append(float(main_angle))
 
                 active_tips = next_tips[:4] if next_tips else active_tips
                 crack_in_disk = crack_mask * disk_mask
                 frame = frame + crack_in_disk * empty_int
                 # last_coords = (x_end, y_end)
-        meta_data = {
-            "phantom_type": 4,
-            "stresspoint": stresspoint,
-            "no_cracks": no_cracks,
-            "crack_length": crack_length,
-            "crack_speed": crack_speed,
-            "meta_angles": meta_angles
-        }
         phantoms[t] = frame
+
+    meta_data = {
+        "phantom_type": 4,
+        "stresspoint": int(stresspoint),
+        "no_cracks": int(no_cracks),
+        "crack_length": int(crack_length),
+        "crack_speed": list(crack_speed),
+        "meta_angles": meta_angles,
+    }
     
     return phantoms, crack_mask, meta_data
 
@@ -182,7 +183,10 @@ if __name__ == "__main__":
     SIZE = 500
     no_frames = 300
     SEED = 42
-    output_dir = f"{SIZE}x{SIZE}_{no_frames}_{SEED}"
+
+    ROOT = "data"
+    output_dir = os.path.join(ROOT, "phantoms")
+    output_dir = os.path.join(output_dir, f"{SIZE}x{SIZE}_{no_frames}_{SEED}")
 
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)

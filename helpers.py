@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-
+import json
 from phantominator import shepp_logan
 
 from skimage.draw import polygon, ellipse, disk, line as draw_line
@@ -43,10 +43,9 @@ def save_phantom_sequence(phantom_seq, filename,meta_data=None):
     """Saves generated sequency as .npy and additional meta data for replication"""
     np.save(filename, phantom_seq)
     if meta_data:
-        meta_filename = filename.replace('.npy', '_meta.txt')
+        meta_filename = filename.replace('.npy', '_meta.json')
         with open(meta_filename, 'w') as f:
-            for key, value in meta_data.items():
-                f.write(f"{key}: {value}\n")
+            json.dump(meta_data, f, indent=4)
     logger().log(f"Phantom saved to {filename} META: {meta_data}")
 
 def display_sequence(phantom_seq, mask, title="", samples=5):
