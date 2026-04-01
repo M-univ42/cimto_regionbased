@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -7,7 +9,7 @@ from skimage.transform import resize
 from skimage import data
 from skimage.color import rgb2gray
 
-from helpers import make_disk, create_shepp_logan, save_phantom_sequence, display_sequence, make_ellipse
+from helpers import make_disk, create_shepp_logan, save_phantom_sequence, display_sequence, make_ellipse, make_crack
 
 def create_phantom1(size, no_frames, full_int, empty_int,
                     fill_mode="linear", seed=42):
@@ -180,6 +182,11 @@ if __name__ == "__main__":
     SIZE = 500
     no_frames = 300
     SEED = 42
+    output_dir = f"{SIZE}x{SIZE}_{no_frames}_{SEED}"
+
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
     phantoms, masks, meta_data = create_phantom1(
         size=SIZE,
         no_frames=no_frames,
@@ -188,6 +195,8 @@ if __name__ == "__main__":
         seed=SEED
     )
     display_sequence(phantoms, masks, samples=5)
+
+    save_phantom_sequence(phantoms, os.path.join(output_dir, "phantom1.npy"), meta_data)
     phantoms, masks, meta_data = create_phantom2(
         size=SIZE,
         no_frames=no_frames,
@@ -196,6 +205,7 @@ if __name__ == "__main__":
         seed = SEED
 
     )
+    save_phantom_sequence(phantoms, os.path.join(output_dir, "phantom2.npy"), meta_data)
     display_sequence(phantoms, masks, samples=5)
     phantoms, masks, meta_data = create_phantom4(
         size=SIZE,
@@ -206,4 +216,4 @@ if __name__ == "__main__":
     )
     
     display_sequence(phantoms, masks, samples=5)
-    
+    save_phantom_sequence(phantoms, os.path.join(output_dir, "phantom4.npy"), meta_data)

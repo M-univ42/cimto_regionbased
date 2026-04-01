@@ -11,17 +11,18 @@ from skimage import data
 from skimage.color import rgb2gray
 
 
-VERBOSE = True
 
-def log(msg):
-    if VERBOSE:
-        print(msg)
 
+class logger():
+    def __init__(self, verbose=True):
+        self.verbose = verbose
+
+    def log(self, msg):
+        if self.verbose:
+            print(msg)
 
 def make_disk(size, x_center, y_center, radius):
     """Binary mask with a filled circle.
-
-    Uses skimage.draw.disk which is cleaner than make_ellipse for equal radii.
     """
     mask = np.zeros((size, size))
     rr, cc = disk(
@@ -46,7 +47,7 @@ def save_phantom_sequence(phantom_seq, filename,meta_data=None):
         with open(meta_filename, 'w') as f:
             for key, value in meta_data.items():
                 f.write(f"{key}: {value}\n")
-    log(f"Phantom saved to {filename} META: {meta_data}")
+    logger().log(f"Phantom saved to {filename} META: {meta_data}")
 
 def display_sequence(phantom_seq, mask, title="", samples=5):
     """Display variable number of samples from sequence"""
