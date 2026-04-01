@@ -20,7 +20,22 @@ The phantoms.py file contains functions to generate 4 different types of phantom
 |4.| Circular background with (Gaussian?) organic texture and sudden crack (angled). The crack is formed by an initial elongated triangle, to which additional triangles are transposed to 5 frames per triangle (to simulate sudden crack). There is a bright hue around the crack in the original paper, and it seems to use elongated poligons instead. | create_phantom4()|Straight crack implemented (angle not yet)|
 
 ---
+#### TODO
+##### Phantoms Feedback
+- [ ] Remove Paths/Replace texture
+- [ ] Create readnom seed/ parameters 
+- [ ] Documentation for parameter/seed 
+##### Synogram
+- [ ] Scanning protocol for projection angle sequence
+- [ ] Strip kernel projector
+- [ ] Poisson noise
 
+##### Code reconstruction
+- [ ] Implement SIRT (from ASTRA)
+- [ ] SIRT per angular subset
+- [ ] Implmenet rSIRT
+- [ ] Create Table 1
+- [ ] Convergence Plot
 #### Results
 
 **NOTE**: The following issues are known and will be fixed:
@@ -60,6 +75,8 @@ Van Eyndhoven, G., Batenburg, K. J., & Sijbers, J. (2014). Region-based iterativ
 ---
 
 #### Resources:
+
+https://astra-toolbox.com/docs/algs/SIRT.html
 ##### Scikit
 https://sigpy.readthedocs.io/en/latest/generated/sigpy.shepp_logan.html
 https://github.com/mckib2/phantominator/blob/main/phantominator/ct_shepp_logan.py
